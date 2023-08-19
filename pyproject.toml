@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "fastapi-sn"
+version = "0.1.0"
+description = "Social network project using FastAPI and GoLang"
+authors = ["NelttjeN <tatyapa0880@yandex.ru>"]
+readme = "README.md"
+packages = [{include = "fastapi_sn"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.101.1"
+pydantic = "^2.2.1"
+psycopg2-binary = "^2.9.7"
+sqlalchemy = "^2.0.20"
+alembic = "^1.11.3"
+fastapi-users = {extras = ["sqlalchemy"], version = "^12.1.1"}
+asyncpg = "^0.28.0"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.1.0"
+flake8-bugbear = "^23.7.10"
+flake8-builtins = "^2.1.0"
+flake8-commas = "^2.1.0"
+flake8-functions-names = "^0.4.0"
+flake8-import-order = "^0.18.2"
+flake8-length = "^0.3.1"
+flake8-quotes = "^3.3.2"
+flake8-variables-names = "^0.0.6"
+flake8_simplify = "^0.20.0"
+pep8-naming = "^0.13.3"
+coverage = "^7.3.0"
+pyflakes = "^3.1.0"
+pipdeptree = "^2.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
