@@ -1,63 +1,51 @@
 import logging
-from typing import (
-    Any, AsyncGenerator, Optional, Union,
-)
+from enum import Enum
+from datetime import timedelta, datetime
 
-from fastapi import (
-    Depends, Request,
-)
-from fastapi_users import (
-    BaseUserManager, IntegerIDMixin,
-)
-from fastapi_users.authentication import (
-    AuthenticationBackend, BearerTransport, JWTStrategy,
-)
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
+import jwt
 
-from src.auth.dependencies import get_user_db
-from src.auth.models import Users
-from src.auth.schemas import UserCreate
 from src.config import config
+from src.users.models import User
 
 debugger = logging.getLogger('debugger')
 
-transport = BearerTransport(tokenUrl='api/auth/jwt/login')
 SECRET = config('JWT_SECRET', module='src.auth.config')
+AUTH_TOKEN_EXPIRES = timedelta(minutes=config('ACCESS_TOKEN_EXPIRE_MINUTES', module='src.auth.config'))
+REFRESH_TOKEN_EXPIRES = timedelta(minutes=config('REFRESH_TOKEN_EXPIRE_MINUTES', module='src.auth.config'))
 
 
-def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(
-        secret=SECRET,
-        lifetime_seconds=3600,
+class AuthTokenType(str, Enum):
+    access = 'access_token'
+    refresh = 'refresh_token'
+
+
+def _create_token(user: User, token_type: AuthTokenType, expires: timedelta) -> str:
+    payload = {
+        'user_id': user.id,
+        'username': user.username,
+        'token_type': token_type.name,
+        'expires': (datetime.utcnow() + expires).isoformat(),
+    }
+    return jwt.encode(
+        payload=payload,
+        key=SECRET,
+        algorithm='HS256',
     )
 
 
-auth_backend = AuthenticationBackend(
-    name='jwt-authentication',
-    transport=transport,
-    get_strategy=get_jwt_strategy,
-)
+def create_access_token(user: User) -> str:
+    return _create_token(user, AuthTokenType.access, expires=AUTH_TOKEN_EXPIRES)
 
 
-class UserManager(IntegerIDMixin, BaseUserManager[Users, int]):
-    reset_password_token_secret = SECRET
-    verification_token_secret = SECRET
-
-    async def on_after_register(
-            self, user: Users, request: Optional[Request] = None,
-    ) -> None:
-        debugger.debug(f'User {user.username} registered ')
-
-    async def on_after_request_verify(
-        self, user: Users, token: str, request: Optional[Request] = None,
-    ) -> None:
-        debugger.debug('Verifying token for %d id: %s' % (user.id, token))
-
-    async def validate_password(
-        self, password: str, user: Union[UserCreate, Users],
-    ) -> None:
-        pass
+def create_refresh_token(user: User) -> str:
+    return _create_token(user, AuthTokenType.refresh, expires=REFRESH_TOKEN_EXPIRES)
 
 
-async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)) -> AsyncGenerator[UserManager, Any]:
-    yield UserManager(user_db=user_db)
+def generate_tokens(user: User) -> dict[str, str]:
+    access_token = create_access_token(user)
+    refresh_token = create_refresh_token(user)
+
+    return {
+        AuthTokenType.access: access_token,
+        AuthTokenType.refresh: refresh_token,
+    }
