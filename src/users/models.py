@@ -68,10 +68,10 @@ class User(BaseModel):
         Boolean, default=False, nullable=False,
     )
 
-    # related
-    permission_groups: Mapped[List['PermissionGroup']] = relationship(
-        'PermissionGroup', secondary='user_permission_group', back_populates='users',
-    )
+    # # related
+    # permission_groups: Mapped[List['PermissionGroup']] = relationship(
+    #     'PermissionGroup', secondary='user_permission_group', back_populates='users',
+    # )
 
 
 class PermissionGroup(BaseModel):
@@ -87,10 +87,10 @@ class PermissionGroup(BaseModel):
         JSON, nullable=False, default=dict,
     )
 
-    # related
-    users: Mapped[List['User']] = relationship(
-        'User', secondary='user_permission_group', back_populates='permission_group',
-    )
+    # # related
+    # users: Mapped[List['User']] = relationship(
+    #     'User', secondary='user_permission_group', back_populates='permission_group',
+    # )
 
 
 class UserPermissionGroups(BaseModel):

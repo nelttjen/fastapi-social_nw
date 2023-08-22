@@ -1,2 +1,1 @@
-from src.app import app  # noqa
-from src.routers import app
+from src.routers import app  # noqa

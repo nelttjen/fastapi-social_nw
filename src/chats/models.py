@@ -98,7 +98,7 @@ class ChatUser(BaseModel):
         Integer, ForeignKey(Chat.id), nullable=False,
     )
     role: Mapped[Role] = mapped_column(
-        ORMEnum(Role), default=Role.USER, server_default=Role.USER,
+        ORMEnum(Role), default=Role.USER, server_default=Role.USER.name,
     )
     total_messages: Mapped[int] = mapped_column(
         Integer, default=0, server_default='0',
