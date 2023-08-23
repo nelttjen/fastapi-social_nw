@@ -3,15 +3,14 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 
-from src.users.models import User
-from src.users.services import UserService
-from src.users.schemas import UserCreate
 from src.auth.auth_jwt import AuthTokenType, generate_tokens
 from src.auth.config import JWT_SECRET
 from src.auth.exceptions import BadCredentialsException, BadTokenException
-
+from src.users.models import User
+from src.users.schemas import UserCreate
+from src.users.services import RegisterService, UserService
 
 debugger = logging.getLogger('debugger')
 
@@ -54,10 +53,13 @@ class AuthService:
         }
 
     async def get_user_from_token(
-            self, token: str, token_type: AuthTokenType,
+            self, token: str, token_type: AuthTokenType, with_groups: bool = False,
     ) -> User:
         data = self._parse_token(token=token, token_type=token_type)
-        user = await self.user_service.get_user_by_id(user_id=data['user_id'])
+        if not with_groups:
+            user = await self.user_service.get_user_by_id(user_id=data['user_id'])
+        else:
+            user = await self.user_service.get_user_by_id(user_id=data['user_id'], with_groups=True)
         return user
 
     async def authenticate_user(
@@ -66,7 +68,7 @@ class AuthService:
         user = await self.user_service.get_user_for_login(query=username)
         if not user:
             raise BadCredentialsException
-        if not await self.user_service.check_password_hash(password, user.password):
+        if not await RegisterService.check_password_hash(password, user.password):
             raise BadCredentialsException
 
         return {'user': user, **generate_tokens(user)}

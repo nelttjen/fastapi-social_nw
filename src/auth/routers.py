@@ -3,11 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from src.base.schemas import DetailModel
-from src.auth.dependencies import get_auth_service
-from src.auth.services import AuthService
-from src.auth.schemas import UserAndToken, RefreshToken
 from src.auth.config import oauth2_scheme
+from src.auth.dependencies import get_auth_service
+from src.auth.schemas import RefreshToken, UserAndToken
+from src.auth.services import AuthService
+from src.base.schemas import DetailModel
 from src.users.schemas import UserCreate
 
 auth_router = APIRouter(
@@ -41,6 +41,10 @@ async def token(
     status_code=status.HTTP_201_CREATED,
     response_model=UserAndToken,
     responses={
+        status.HTTP_400_BAD_REQUEST: {
+            'model': DetailModel,
+            'description': 'Bad register credentials',
+        },
         status.HTTP_409_CONFLICT: {
             'model': DetailModel,
             'description': 'User with this username or password already exists',

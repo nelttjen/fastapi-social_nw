@@ -1,16 +1,13 @@
 import datetime
 from enum import Enum
 
-from sqlalchemy import (
-    Boolean, DateTime, Enum as ORMEnum,
-    ForeignKey, Integer, String, Uuid,
-)
-from sqlalchemy.orm import (
-    Mapped, mapped_column, relationship,
-)
+from sqlalchemy import Boolean, DateTime
+from sqlalchemy import Enum as ORMEnum
+from sqlalchemy import ForeignKey, Integer, String, Uuid
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.users.models import User
 from src.base.models import BaseModel
+from src.users.models import User
 
 
 class Role(str, Enum):
@@ -92,10 +89,10 @@ class ChatUser(BaseModel):
         Integer, primary_key=True, autoincrement=True, nullable=False,
     )
     user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(User.id), nullable=False,
+        ForeignKey(User.id), nullable=False,
     )
     chat_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(Chat.id), nullable=False,
+        ForeignKey(Chat.id), nullable=False,
     )
     role: Mapped[Role] = mapped_column(
         ORMEnum(Role), default=Role.USER, server_default=Role.USER.name,
@@ -132,10 +129,10 @@ class InviteLink(BaseModel):
         Uuid, nullable=False,
     )
     chat_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(Chat.id), nullable=False,
+        ForeignKey(Chat.id), nullable=False,
     )
     owner_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(User.id), nullable=False,
+        ForeignKey(User.id), nullable=False,
     )
     max_uses: Mapped[int] = mapped_column(
         Integer, nullable=True, default=None,

@@ -1,18 +1,17 @@
-"""empty message
+"""empty message.
 
-Revision ID: 5e039efc3b86
-Revises: 
-Create Date: 2023-08-21 14:24:27.733524
-
+Revision ID: 2bdb9b423c2b
+Revises:
+Create Date: 2023-08-22 23:51:20.836333
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '5e039efc3b86'
+revision: str = '2bdb9b423c2b'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -35,6 +34,9 @@ def upgrade() -> None:
     sa.Column('is_staff', sa.Boolean(), nullable=False),
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.Column('is_banned', sa.Boolean(), nullable=False),
+    sa.Column('ban_reason', sa.String(length=1024), nullable=True),
+    sa.Column('banned_by', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['banned_by'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)

@@ -1,47 +1,17 @@
+import logging
 from typing import List
 
-from sqlalchemy import (
-    Boolean, Column, ForeignKey, Integer, JSON, String, Table,
-)
-from sqlalchemy.orm import (
-    Mapped, mapped_column, relationship,
-)
+from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String, Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.base.models import (
-    BaseModel, base_metadata,
-)
+from src.base.models import BaseModel
 
-# user = Table(
-#     'user',
-#     base_metadata,
-#     Column('id', Integer, primary_key=True, autoincrement=True, nullable=False),
-#     Column('username', String(length=128), unique=True, nullable=False, index=True),
-#     Column('email', String(length=320), unique=True, nullable=False, index=True),
-#     Column('password', String(length=1024), nullable=False),
-#     Column('is_active', Boolean, default=False, nullable=False),
-#     Column('is_staff', Boolean, default=False, nullable=False),
-#     Column('is_superuser', Boolean, default=False, nullable=False),
-#     Column('is_banned', Boolean, default=False, nullable=False),
-# )
-# permission_group = Table(
-#     'permission_group',
-#     base_metadata,
-#     Column('id', Integer, primary_key=True, autoincrement=True, nullable=False),
-#     Column('name', String(length=128), nullable=False),
-#     Column('permissions', JSON, nullable=False, default=list),
-# )
-#
-# user_permission_group = Table(
-#     'user_permission_group',
-#     base_metadata,
-#     Column('id', Integer, primary_key=True, autoincrement=True, nullable=False),
-#     Column('user_id', Integer, ForeignKey(user.c.id), nullable=False),
-#     Column('permission_group_id', Integer, ForeignKey(permission_group.c.id), nullable=False),
-# )
+info = logging.getLogger('all')
 
 
 class User(BaseModel):
     __tablename__ = 'user'
+    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True, nullable=False,
@@ -67,15 +37,30 @@ class User(BaseModel):
     is_banned: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False,
     )
+    ban_reason: Mapped[str] = mapped_column(
+        String(length=1024), nullable=True, default=None,
+    )
+    banned_by: Mapped[int] = mapped_column(
+        ForeignKey(id), nullable=True, default=None,
+    )
 
-    # # related
-    # permission_groups: Mapped[List['PermissionGroup']] = relationship(
-    #     'PermissionGroup', secondary='user_permission_group', back_populates='users',
-    # )
+    # related
+    permission_groups: List['PermissionGroup'] = relationship(
+        'PermissionGroup', secondary='user_permission_group', back_populates='users',
+        lazy='selectin',
+    )
+
+    def has_permission(self, permission: str) -> bool:
+        try:
+            return permission in set([perm for group in self.permission_groups for perm in group.permissions])
+        except Exception as e:
+            info.error(f'error get user permission: {e}')
+            return False
 
 
 class PermissionGroup(BaseModel):
     __tablename__ = 'permission_group'
+    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True, nullable=False,
@@ -88,19 +73,16 @@ class PermissionGroup(BaseModel):
     )
 
     # # related
-    # users: Mapped[List['User']] = relationship(
-    #     'User', secondary='user_permission_group', back_populates='permission_group',
-    # )
+    users: List['User'] = relationship(
+        'User', secondary='user_permission_group', back_populates='permission_groups',
+        lazy='selectin',
+    )
 
 
-class UserPermissionGroups(BaseModel):
-    __tablename__ = 'user_permission_group'
-    id: Mapped[int] = mapped_column(
-        Integer, primary_key=True, autoincrement=True, nullable=False,
-    )
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(User.id), nullable=False,
-    )
-    permission_group_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(PermissionGroup.id), nullable=False,
-    )
+user_permission_group = Table(
+    'user_permission_group',
+    BaseModel.metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True, nullable=False),
+    Column('user_id', Integer, ForeignKey(User.id), nullable=False),
+    Column('permission_group_id', Integer, ForeignKey(PermissionGroup.id), nullable=False),
+)

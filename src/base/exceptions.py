@@ -1,4 +1,8 @@
+from typing import Optional, TypeVar
+
 from fastapi import HTTPException, status
+
+HTTP_EXC = TypeVar('HTTP_EXC', bound=HTTPException)
 
 
 class BadRequest(HTTPException):
@@ -6,10 +10,10 @@ class BadRequest(HTTPException):
     detail = 'Bad request'
     headers = None
 
-    def __init__(self):
+    def __init__(self, detail: Optional[str] = None):
         super().__init__(
             status_code=self.status_code,
-            detail=self.detail,
+            detail=detail or self.detail,
             headers=self.headers,
         )
 
@@ -19,10 +23,10 @@ class Unauthorized(HTTPException):
     detail = 'Unauthorized'
     headers = None
 
-    def __init__(self):
+    def __init__(self, detail: Optional[str] = None):
         super().__init__(
             status_code=self.status_code,
-            detail=self.detail,
+            detail=detail or self.detail,
             headers=self.headers,
         )
 
@@ -32,10 +36,10 @@ class Forbidden(HTTPException):
     detail = 'Forbidden'
     headers = None
 
-    def __init__(self):
+    def __init__(self, defail: Optional[str] = None):
         super().__init__(
             status_code=self.status_code,
-            detail=self.detail,
+            detail=defail or self.detail,
             headers=self.headers,
         )
 
@@ -45,9 +49,9 @@ class NotFound(HTTPException):
     detail = 'Requested resource not found'
     headers = None
 
-    def __init__(self):
+    def __init__(self, detail: Optional[str] = None):
         super().__init__(
             status_code=self.status_code,
-            detail=self.detail,
+            detail=detail or self.detail,
             headers=self.headers,
         )

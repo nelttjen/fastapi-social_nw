@@ -1,6 +1,6 @@
 import logging
+from datetime import datetime, timedelta
 from enum import Enum
-from datetime import timedelta, datetime
 
 import jwt
 

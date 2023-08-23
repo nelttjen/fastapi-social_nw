@@ -1,4 +1,5 @@
 from fastapi import WebSocketException, status
+
 from src.base.exceptions import Unauthorized
 
 
@@ -17,7 +18,10 @@ class BadTokenException(Unauthorized):
 
 
 class WebSocketBadTokenException(WebSocketException):
-    """WebSocket exception for bad token. Used of token is invalid or expired."""
+    """WebSocket exception for bad token.
+
+    Used of token is invalid or expired.
+    """
 
     detail = 'WebSocket Token expired or incorrect'
     status_code = status.WS_1008_POLICY_VIOLATION
@@ -26,4 +30,3 @@ class WebSocketBadTokenException(WebSocketException):
         super().__init__(
             code=self.status_code,
         )
-

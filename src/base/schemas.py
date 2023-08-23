@@ -1,6 +1,4 @@
-from pydantic import (
-    BaseModel, BaseConfig
-)
+from pydantic import BaseConfig, BaseModel
 
 
 class BaseORMModel(BaseModel):
@@ -10,3 +8,7 @@ class BaseORMModel(BaseModel):
 
 class DetailModel(BaseModel):
     detail: str
+
+
+class SuccessModel(BaseModel):
+    success: bool

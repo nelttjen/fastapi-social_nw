@@ -1,6 +1,6 @@
 from src.app import app
 from src.auth.routers import auth_router
-from src.users.routers import user_router
+from src.users.routers import admin_user_router, user_router
 
 app.include_router(
     auth_router,
@@ -12,4 +12,10 @@ app.include_router(
     user_router,
     prefix='/api/users',
     tags=['users'],
+)
+
+app.include_router(
+    admin_user_router,
+    prefix='/api/users',
+    tags=['admin'],
 )
