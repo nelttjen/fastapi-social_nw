@@ -51,3 +51,7 @@ build-backend = "poetry.core.masonry.api"
 line_length = 120
 multi_line_output = 3
 skip="venv,alembic"
+include_trailing_comma=1
+
+[tool.flake8]
+extend-immutable-calls = ["Depends", "Form"]

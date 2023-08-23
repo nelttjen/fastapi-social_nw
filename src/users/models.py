@@ -1,7 +1,8 @@
 import logging
 from typing import List
 
-from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String, Table
+from sqlalchemy import (JSON, Boolean, Column, ForeignKey, Integer, String,
+                        Table)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.base.models import BaseModel
@@ -13,7 +14,7 @@ class User(BaseModel):
     __tablename__ = 'user'
     __allow_unmapped__ = True
 
-    id: Mapped[int] = mapped_column(
+    id: Mapped[int] = mapped_column(  # noqa
         Integer, primary_key=True, autoincrement=True, nullable=False,
     )
     username: Mapped[str] = mapped_column(
@@ -62,7 +63,7 @@ class PermissionGroup(BaseModel):
     __tablename__ = 'permission_group'
     __allow_unmapped__ = True
 
-    id: Mapped[int] = mapped_column(
+    id: Mapped[int] = mapped_column(  # noqa
         Integer, primary_key=True, autoincrement=True, nullable=False,
     )
     name: Mapped[str] = mapped_column(

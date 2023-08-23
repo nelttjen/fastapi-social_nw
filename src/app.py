@@ -11,6 +11,7 @@ init_loggers()
 app = FastAPI(debug=config('DEBUG', False))
 # app.add_middleware(QueryLoggingMiddleware)
 
+
 @app.on_event('startup')
 async def startup_event():
     await create_tables()

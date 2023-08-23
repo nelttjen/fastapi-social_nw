@@ -57,7 +57,7 @@ class Role(str, Enum):
 class Chat(BaseModel):
     __tablename__ = 'chat'
 
-    id: Mapped[int] = mapped_column(
+    id: Mapped[int] = mapped_column(  # noqa
         Integer, primary_key=True, autoincrement=True, nullable=False,
     )
     name: Mapped[str] = mapped_column(
@@ -85,7 +85,7 @@ class Chat(BaseModel):
 class ChatUser(BaseModel):
     __tablename__ = 'chat_user'
 
-    id: Mapped[int] = mapped_column(
+    id: Mapped[int] = mapped_column(  # noqa
         Integer, primary_key=True, autoincrement=True, nullable=False,
     )
     user_id: Mapped[int] = mapped_column(
@@ -122,7 +122,7 @@ class ChatUser(BaseModel):
 class InviteLink(BaseModel):
     __tablename__ = 'invite_link'
 
-    id: Mapped[int] = mapped_column(
+    id: Mapped[int] = mapped_column(  # noqa
         Integer, primary_key=True, autoincrement=True, nullable=False,
     )
     link: Mapped[str] = mapped_column(

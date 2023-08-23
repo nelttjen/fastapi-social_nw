@@ -9,12 +9,10 @@ from sqlalchemy.exc import IntegrityError
 from src.auth.config import pwd_context
 from src.base.exceptions import HTTP_EXC, BadRequest, NotFound, Unauthorized
 from src.config import config
-from src.users.exceptions import (
-    EmailValidationError,
-    PasswordValidationError,
-    UsernameOrEmailAlreadyExists,
-    UsernameValidationError
-)
+from src.users.exceptions import (EmailValidationError,
+                                  PasswordValidationError,
+                                  UsernameOrEmailAlreadyExists,
+                                  UsernameValidationError)
 from src.users.models import User
 from src.users.repositories import UserRepository
 from src.users.schemas import BanData, UserUpdate
@@ -158,8 +156,11 @@ class RegisterService:
 
     @staticmethod
     async def email_validator(email: EmailStr) -> None:
-        warnings.warn("This func is deprecated, use 'PyDantic' 'EmailStr' instead",
-                      DeprecationWarning, 2)
+        warnings.warn(
+            stacklevel=2,
+            category=DeprecationWarning,
+            message="This func is deprecated, use 'PyDantic' 'EmailStr' instead",
+        )
 
         regex_email = re.compile(r'^[\w-]+@([\w-]+\.)+[\w-]{2,4}$')
         if not regex_email.match(email):

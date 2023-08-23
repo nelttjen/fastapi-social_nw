@@ -3,9 +3,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from src.auth.dependencies import get_current_superuser, get_current_superuser_with_groups, get_current_user
+from src.auth.dependencies import (get_current_superuser,
+                                   get_current_superuser_with_groups,
+                                   get_current_user)
 from src.base.schemas import DetailModel, SuccessModel
-from src.users.dependencies import get_admin_user_service, get_user_or_404, get_user_service
+from src.users.dependencies import (get_admin_user_service, get_user_or_404,
+                                    get_user_service)
 from src.users.models import User
 from src.users.schemas import BanData, UserRead, UserUpdate
 from src.users.services import AdminUserService, UserService

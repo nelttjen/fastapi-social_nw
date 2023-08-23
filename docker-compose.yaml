@@ -29,7 +29,7 @@ services:
     networks:
       - database
     depends_on:
-     - postgresdb
+      - postgresdb
 
 volumes:
   postgres_data:
