@@ -3,9 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from sqlalchemy import or_, select
-from sqlalchemy.orm import selectinload
 
-from src.base.exceptions import NotFound
 from src.base.repositories import BaseRepository
 from src.users.exceptions import UsernameOrEmailAlreadyExists
 from src.users.models import User
@@ -25,14 +23,8 @@ class UserRepository(BaseRepository[User]):
 
         return result or None
 
-    async def get_by_id(self, user_id: int, with_groups: bool = False) -> User | None:
-        stmt = select(User).where(User.id == user_id)
-        if with_groups:
-            stmt = stmt.options(
-                selectinload(User.permission_groups),
-            )
-        result = await self.session.scalar(stmt)
-        return result or None
+    async def get_by_id(self, user_id: int) -> User | None:
+        return await self.session.get(User, user_id) or None
 
     async def credentials_available(
             self, email: str, username: str, not_by: Optional[int] = None,
@@ -56,9 +48,3 @@ class UserRepository(BaseRepository[User]):
                 raise UsernameOrEmailAlreadyExists('username already taken')
             if db_email == email:
                 raise UsernameOrEmailAlreadyExists('email already taken')
-
-    async def get_user_or_404(self, user_id: int) -> User:
-        user = await self.get_by_id(user_id)
-        if not user:
-            raise NotFound('user not found')
-        return user

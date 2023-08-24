@@ -24,6 +24,10 @@ DB_NAME = os.getenv('POSTGRES_DB')
 
 DB_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
+CONNECTION_PROTOCOL = 'http'
+DOMAIN = '127.0.0.1:8000'
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

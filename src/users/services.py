@@ -7,12 +7,14 @@ from pydantic import EmailStr
 from sqlalchemy.exc import IntegrityError
 
 from src.auth.config import pwd_context
-from src.base.exceptions import HTTP_EXC, BadRequest, NotFound, Unauthorized
+from src.base.exceptions import HTTP_EXC, BadRequest, Forbidden, NotFound, Unauthorized
 from src.config import config
-from src.users.exceptions import (EmailValidationError,
-                                  PasswordValidationError,
-                                  UsernameOrEmailAlreadyExists,
-                                  UsernameValidationError)
+from src.users.exceptions import (
+    EmailValidationError,
+    PasswordValidationError,
+    UsernameOrEmailAlreadyExists,
+    UsernameValidationError,
+)
 from src.users.models import User
 from src.users.repositories import UserRepository
 from src.users.schemas import BanData, UserUpdate
@@ -78,8 +80,8 @@ class UserService:
     async def get_user_for_login(self, query: str) -> User | None:
         return await self.user_repository.find_for_login(search=query)
 
-    async def get_user_by_id(self, user_id: int, with_groups: bool = False) -> User | None:
-        return await self.user_repository.get_by_id(user_id=user_id, with_groups=with_groups)
+    async def get_user_by_id(self, user_id: int) -> User | None:
+        return await self.user_repository.get_by_id(user_id=user_id)
 
     async def _get_user_or_exception(
             self, user_id: int, exception: Type[HTTP_EXC], detail: Optional[str] = None,
@@ -110,8 +112,11 @@ class AdminUserService:
     user_repository: UserRepository
 
     async def ban_user(
-            self, user, banned_by: User, ban_data: BanData,
+            self, user: User, banned_by: User, ban_data: BanData,
     ) -> None:
+        if not await banned_by.has_permission('ban_user'):
+            raise Forbidden('You do not have permission to ban users')
+
         if user.id == banned_by.id:
             raise BadRequest('You cannot ban yourself')
         if user.is_superuser:
@@ -120,6 +125,8 @@ class AdminUserService:
         user.is_banned = True
         user.banned_by = banned_by.id
         user.ban_reason = ban_data.ban_reason
+
+        print(await banned_by.has_permission('ban_users'))
 
         await self.user_repository.update(user)
 

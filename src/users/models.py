@@ -1,8 +1,8 @@
 import logging
 from typing import List
 
-from sqlalchemy import (JSON, Boolean, Column, ForeignKey, Integer, String,
-                        Table)
+from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String, Table
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.base.models import BaseModel
@@ -10,7 +10,7 @@ from src.base.models import BaseModel
 info = logging.getLogger('all')
 
 
-class User(BaseModel):
+class User(AsyncAttrs, BaseModel):
     __tablename__ = 'user'
     __allow_unmapped__ = True
 
@@ -48,18 +48,25 @@ class User(BaseModel):
     # related
     permission_groups: List['PermissionGroup'] = relationship(
         'PermissionGroup', secondary='user_permission_group', back_populates='users',
-        lazy='selectin',
+        lazy='select',
     )
 
-    def has_permission(self, permission: str) -> bool:
+    async def has_permission(self, permission: str) -> bool:
+        if self.is_superuser:
+            return True
+
         try:
-            return permission in set([perm for group in self.permission_groups for perm in group.permissions])
+            permissions = set(
+                [perm for group in await self.awaitable_attrs.permission_groups for perm in group.permissions],
+            )
+            info.debug(f'get user permission: {permissions}')
+            return permission in permissions
         except Exception as e:
             info.error(f'error get user permission: {e}')
             return False
 
 
-class PermissionGroup(BaseModel):
+class PermissionGroup(AsyncAttrs, BaseModel):
     __tablename__ = 'permission_group'
     __allow_unmapped__ = True
 
@@ -76,7 +83,7 @@ class PermissionGroup(BaseModel):
     # # related
     users: List['User'] = relationship(
         'User', secondary='user_permission_group', back_populates='permission_groups',
-        lazy='selectin',
+        lazy='select',
     )
 
 

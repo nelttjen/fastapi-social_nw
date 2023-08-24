@@ -16,10 +16,10 @@ debugger = logging.getLogger('debugger')
 
 
 async def _get_user_from_token(
-        auth_service: AuthService, token: str, checks: Optional[list[str]] = None, with_groups: bool = False,
+        auth_service: AuthService, token: str, checks: Optional[list[str]] = None,
 ):
     try:
-        user = await auth_service.get_user_from_token(token, AuthTokenType.access, with_groups=with_groups)
+        user = await auth_service.get_user_from_token(token, AuthTokenType.access)
     except JWTError as exc:
         raise Unauthorized('Token expired') from exc
 
@@ -65,27 +65,3 @@ async def get_current_superuser(
         access_token: Annotated[str, Depends(oauth2_scheme)],
 ) -> User:
     return await _get_user_from_token(auth_service, access_token, checks=['is_staff', 'is_superuser'])
-
-
-async def get_current_user_with_groups(
-        auth_service: Annotated[AuthService, Depends(get_auth_service)],
-        access_token: Annotated[str, Depends(oauth2_scheme)],
-) -> User:
-    return await _get_user_from_token(auth_service, access_token,
-                                      with_groups=True)
-
-
-async def get_current_staff_user_with_groups(
-        auth_service: Annotated[AuthService, Depends(get_auth_service)],
-        access_token: Annotated[str, Depends(oauth2_scheme)],
-) -> User:
-    return await _get_user_from_token(auth_service, access_token,
-                                      checks=['is_staff'], with_groups=True)
-
-
-async def get_current_superuser_with_groups(
-        auth_service: Annotated[AuthService, Depends(get_auth_service)],
-        access_token: Annotated[str, Depends(oauth2_scheme)],
-) -> User:
-    return await _get_user_from_token(auth_service, access_token,
-                                      checks=['is_staff', 'is_superuser'], with_groups=True)
