@@ -1,5 +1,4 @@
 import logging
-from typing import AsyncGenerator
 
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -13,11 +12,6 @@ DATABASE_URL = config('DB_URL')
 engine = create_async_engine(DATABASE_URL)
 async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 debugger = logging.getLogger('debugger')
-
-
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session_maker() as session:
-        yield session
 
 
 async def create_tables() -> None:
@@ -38,4 +32,5 @@ def log_query(
     # if not hasattr(conn, 'queries'):
     #     setattr(conn, 'queries', [])
     # conn.queries.append([statement, parameters])
-    debugger.debug(f'Executing query:\n{statement} with parameters: {parameters}')
+    if config('ENABLE_QUERY_DEBUGGING', False):
+        debugger.debug(f'Executing query:\n{statement} with parameters: {parameters}')

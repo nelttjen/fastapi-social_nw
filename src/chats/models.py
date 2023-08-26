@@ -4,6 +4,7 @@ from enum import Enum
 from sqlalchemy import Boolean, DateTime
 from sqlalchemy import Enum as ORMEnum
 from sqlalchemy import ForeignKey, Integer, String, Uuid
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.base.models import BaseModel
@@ -15,47 +16,15 @@ class Role(str, Enum):
     MODER = '1'
     ADMIN = '2'
 
-
-# chat = Table(
-#     'chat',
-#     base_metadata,
-#     Column('id', Integer, primary_key=True, autoincrement=True, nullable=False),
-#     Column('name', String(length=255), nullable=False),
-#     Column('owner_id', Integer, ForeignKey(user.c.id), nullable=False),
-#     Column('created_at', DateTime, default=datetime.datetime.utcnow),
-#     Column('is_closed', Boolean, default=False),
-#     Column('members_count', Integer, nullable=False, default=1, server_default='1'),
-# )
-#
-# chat_user = Table(
-#     'chat_user',
-#     base_metadata,
-#     Column('id', Integer, primary_key=True, autoincrement=True, nullable=False),
-#     Column('user_id', Integer, ForeignKey(user.c.id), nullable=False),
-#     Column('chat_id', Integer, ForeignKey(chat.c.id), nullable=False),
-#     Column('role', ORMEnum(Role), default=Role.USER, server_default=Role.USER.name),
-#     Column('total_messages', Integer, default=0, server_default='0'),
-#     Column('last_active', DateTime, default=datetime.datetime.utcnow),
-#     Column('is_left', Boolean, default=False),
-#     Column('is_banned', Boolean, default=False),
-# )
-#
-# invite_link = Table(
-#     'invite_link',
-#     base_metadata,
-#     Column('id', Integer, primary_key=True, autoincrement=True, nullable=False),
-#     Column('link', Uuid, nullable=False),
-#     Column('chat_id', Integer, ForeignKey(chat.c.id)),
-#     Column('owner_id', Integer, ForeignKey(user.c.id)),
-#     Column('max_uses', Integer, nullable=True, default=None),
-#     Column('count_uses', Integer, nullable=False, default=0, server_default='0'),
-#     Column('created_at', DateTime, default=datetime.datetime.utcnow),
-#     Column('expires_at', DateTime, nullable=True, default=None),
-# )
+    def check_permission(self, other: 'Role') -> bool:
+        int_role = int(self.value)
+        int_other = int(other.value)
+        return int_role >= int_other
 
 
-class Chat(BaseModel):
+class Chat(AsyncAttrs, BaseModel):
     __tablename__ = 'chat'
+    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(  # noqa
         Integer, primary_key=True, autoincrement=True, nullable=False,
@@ -77,13 +46,18 @@ class Chat(BaseModel):
     )
 
     # relation
-    owner: Mapped['User'] = relationship(
-        'User',
+    owner: 'User' = relationship(
+        'User', lazy='select',
+    )
+
+    users: list['User'] = relationship(
+        'ChatUser', lazy='dynamic',
     )
 
 
-class ChatUser(BaseModel):
+class ChatUser(AsyncAttrs, BaseModel):
     __tablename__ = 'chat_user'
+    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(  # noqa
         Integer, primary_key=True, autoincrement=True, nullable=False,
@@ -111,16 +85,17 @@ class ChatUser(BaseModel):
     )
 
     # relation
-    chat: Mapped['Chat'] = relationship(
-        'Chat',
+    chat: 'Chat' = relationship(
+        'Chat', lazy='joined', back_populates='users',
     )
-    user: Mapped['User'] = relationship(
-        'User',
+    user: 'User' = relationship(
+        'User', lazy='select',
     )
 
 
-class InviteLink(BaseModel):
+class InviteLink(AsyncAttrs, BaseModel):
     __tablename__ = 'invite_link'
+    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(  # noqa
         Integer, primary_key=True, autoincrement=True, nullable=False,
@@ -148,9 +123,9 @@ class InviteLink(BaseModel):
     )
 
     # relation
-    chat: Mapped['Chat'] = relationship(
-        'Chat',
+    chat: 'Chat' = relationship(
+        'Chat', lazy='joined',
     )
-    owner: Mapped['User'] = relationship(
-        'User',
+    owner: 'User' = relationship(
+        'User', lazy='select',
     )

@@ -3,15 +3,17 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.base.dependencies import get_async_session, get_limit_paginator
+from src.base.paginations import BaseLimitPagination
 from src.chats.repositories import ChatRepository
 from src.chats.services import ChatService
-from src.database import get_async_session
 
 
 async def get_chat_repository(
-    session: Annotated[AsyncSession, Depends(get_async_session)],
+        session: Annotated[AsyncSession, Depends(get_async_session)],
+        paginator: Annotated[BaseLimitPagination, Depends(get_limit_paginator)],
 ):
-    return ChatRepository(session)
+    return ChatRepository(session, paginator)
 
 
 async def get_chat_service(

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database import get_async_session
+from src.base.dependencies import get_async_session
 from src.users.models import User
 from src.users.repositories import UserRepository
 from src.users.services import AdminUserService, UserService

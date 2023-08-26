@@ -11,6 +11,7 @@ info = logging.getLogger('all')
 
 BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEBUG = True
+ENABLE_QUERY_DEBUGGING = True
 
 load_dotenv(BASE_DIR / '.env')
 
