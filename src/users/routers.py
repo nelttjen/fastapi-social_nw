@@ -65,7 +65,7 @@ async def current_user_post(
 
 
 @admin_user_router.post(
-    path='/ban/<user_id>',
+    path='/ban/{user_id}',
     response_model=SuccessModel,
     responses={
         status.HTTP_400_BAD_REQUEST: {

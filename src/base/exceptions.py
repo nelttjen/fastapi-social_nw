@@ -55,3 +55,16 @@ class NotFound(HTTPException):
             detail=detail or self.detail,
             headers=self.headers,
         )
+
+
+class DataConflict(HTTPException):
+    status_code = status.HTTP_409_CONFLICT
+    detail = 'Data conflicts with database instances'
+    headers = None
+
+    def __init__(self, detail: Optional[str] = None):
+        super().__init__(
+            status_code=self.status_code,
+            detail=detail or self.detail,
+            headers=self.headers,
+        )

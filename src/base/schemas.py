@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Generic, Optional, TypeVar
 
+from fastapi import status
 from pydantic import BaseConfig, BaseModel
 from sqlalchemy.engine import Row
 
@@ -55,3 +56,11 @@ class PaginatedResponse(BaseModel, Generic[TSQL]):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+base_401_response = {
+    status.HTTP_401_UNAUTHORIZED: {
+        'model': DetailModel,
+        'desctiption': 'Token expired or incorrect',
+    },
+}

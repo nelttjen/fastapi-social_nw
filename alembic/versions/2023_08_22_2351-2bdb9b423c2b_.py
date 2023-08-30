@@ -74,7 +74,7 @@ def upgrade() -> None:
     )
     op.create_table('invite_link',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('link', sa.Uuid(), nullable=False),
+    sa.Column('link', sa.String(length=128), nullable=False),
     sa.Column('chat_id', sa.Integer(), nullable=False),
     sa.Column('owner_id', sa.Integer(), nullable=False),
     sa.Column('max_uses', sa.Integer(), nullable=True),

@@ -42,13 +42,11 @@ class BaseLimitPagination:
         )
 
     def _get_page(
-            self, page_type: Literal['prev', 'next'], current_page: int,
+            self, current_page: int,
     ) -> Optional[str]:
         if self.pages is None:
             info.error('call _calculate_items_pages() before using _get_page method')
             return
-
-        current_page -= 1 if page_type == 'prev' else -1
 
         if current_page > self.pages or current_page < 1:
             return
@@ -58,7 +56,7 @@ class BaseLimitPagination:
         query_params = parse.urlencode(
             {**self.request.query_params, 'page': str(current_page)},
         )
-        return f'{protocol}://{domain}/{self.request.url}?{query_params}'
+        return f'{protocol}://{domain}{self.request.url.path}?{query_params}'
 
     async def _calculate_items_pages(
             self, query: Select[Iterable[T]] | CompoundSelect,
@@ -89,6 +87,6 @@ class BaseLimitPagination:
             current_page=self.page,
             items=self.items,
             items_per_page=self.items_per_page,
-            next_page=self._get_page('next', self.page),
-            previous_page=self._get_page('prev', self.page),
+            next_page=self._get_page(self.page + 1),
+            previous_page=self._get_page(self.page - 1),
         )

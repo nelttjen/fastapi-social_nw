@@ -3,7 +3,7 @@ from enum import Enum
 
 from sqlalchemy import Boolean, DateTime
 from sqlalchemy import Enum as ORMEnum
-from sqlalchemy import ForeignKey, Integer, String, Uuid
+from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -101,7 +101,7 @@ class InviteLink(AsyncAttrs, BaseModel):
         Integer, primary_key=True, autoincrement=True, nullable=False,
     )
     link: Mapped[str] = mapped_column(
-        Uuid, nullable=False,
+        String, nullable=False,
     )
     chat_id: Mapped[int] = mapped_column(
         ForeignKey(Chat.id), nullable=False,
@@ -129,3 +129,8 @@ class InviteLink(AsyncAttrs, BaseModel):
     owner: 'User' = relationship(
         'User', lazy='select',
     )
+
+    def is_expired(self) -> bool:
+        expired = self.expires_at is not None and self.expires_at < datetime.datetime.utcnow()
+        max_uses = self.max_uses is not None and self.count_uses >= self.max_uses
+        return expired or max_uses
